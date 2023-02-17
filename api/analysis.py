@@ -1,6 +1,8 @@
 import tweepy
 import string
 import nltk
+import os
+from dotenv import load_dotenv
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import word_tokenize
@@ -11,10 +13,13 @@ nltk.download('vader_lexicon')
 nltk.download('wordnet')
 nltk.download('stopwords')
 
-Api_key = 'bPLWMtnUuH6xkh9nlfniMiNZZ'
-API_secret_key = 'ARlA2pElm81JNmvg35yYFVSK4zwl4QBuiLouICtoLRzqDEJZKt'
-Access_Token = '1574560272399859715-JCkuEZoHCgTJxN7QJqD79qB6JsYUa4'
-Access_Token_Secret = '0sJdBHuNBzucxgeU6et4p5tyOgfjwB2esAV9zRMwMH0kC'
+load_dotenv()
+
+Api_key = os.getenv('Api_key')
+API_secret_key = os.getenv('API_secret_key')
+Access_Token = os.getenv('Access_Token')
+Access_Token_Secret = os.getenv('Access_Token_Secret')
+
 def get_tweets(query, tweet_count=2500):
     # Authenticate to Twitter
     auth = tweepy.OAuthHandler(Api_key, API_secret_key)

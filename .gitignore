@@ -23,4 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 api/notebook.ipynb
-api/keys.py
+api/.env
+
+
+
+
