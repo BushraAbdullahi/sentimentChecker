@@ -10,11 +10,11 @@ def getQuery(search):
 
 pm = 24150
 # query = 'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&pageids={}&formatversion=2'
-query = 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&pageids={}'
+query2 = 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&pageids={}'
 @app.route('/')
 def index():
     result = getQuery(query2.format(pm))
-    return result
+    return result 
 
-
+# https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&sites=enwiki&props=claims&titles=Prime%20Minister%20of%20the%20United%20Kingdom
 

@@ -1,4 +1,4 @@
-#!/Users/bushra.abdullahi/Documents/Workspace/sentimentChecker/api/venv/bin/python3.10
+#!/Users/bushra.abdullahi/Documents/Workspace/sentimentChecker/api/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
