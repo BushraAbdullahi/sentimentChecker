@@ -6,17 +6,17 @@ This project is a web application that displays information about UK Cabinet Min
 
 To run this app on your local machine, follow the steps below:
 
-1. Clone the repository by running: git clone git@github.com:BushraAbdullahi/sentimentChecker.git
-2. Make sure you're in the frontend directory: sentimentChecker
-3. Install the necessary packages: npm install
-4. Run this command: export FLASK_APP=api.py
-5. Navigate to the backend directory: cd api
-6. Install virtualenv: pip3 install virtualenv
-7. Set up a virtual environment: virtualenv venv
-8. Activate venv: source venv/bin/activate
-9. Install the necessary packages: pip3 install -r requirements.txt
-10. Start the front and back-end servers: npm start
-11. Open your browser and navigate to http://localhost:3000
+1. Clone the repository by running: `git clone git@github.com:BushraAbdullahi/sentimentChecker.git`
+2. Make sure you're in the frontend directory sentimentChecker
+3. Install the necessary packages: `npm install`
+4. Run this command: `export FLASK_APP=api.py`
+5. Navigate to the backend directory: `cd api`
+6. Install virtualenv: `pip install virtualenv`
+7. Set up a virtual environment: `virtualenv venv`
+8. Activate venv: `source venv/bin/activate`
+9. Install the necessary packages: `pip install -r requirements.txt`
+10. Start the front and back-end servers: `npm start`
+11xc. Open your browser and navigate to http://localhost:3000
 
 ## How it Works
 The app queries the web to get the names and images of incumbent UK Cabinet Ministers. It then uses Tweepy to get the latest tweets for each minister and nltk to perform sentiment analysis on the tweets. The sentiment score is then displayed on the app along with the minister's name and image.
