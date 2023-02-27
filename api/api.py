@@ -22,5 +22,10 @@ def index():
     url = 'https://www.gov.uk/government/ministers'
     page = urllib.urlopen(url)
     soup = BeautifulSoup(page, 'html.parser')
-    cabinet_list = soup.find('ul', attrs={'class': 'cabinet-list'})
-    return str(cabinet_list)
+    cabinet_list = soup.find('ul', {'class': 'cabinet-list'})
+    names = []
+    for cabinet_member in cabinet_list.find_all('li'):
+        name = cabinet_member.find('span', {'class': 'app-person-link__name'})
+        if name:
+            names.append(name.text)
+    return jsonify(names)
