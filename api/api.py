@@ -10,8 +10,6 @@ app = Flask(__name__)
 cors = CORS(app)
 
 # Define function to scrape attributes from HTML using Beautiful Soup
-
-
 def getAttributes(url, tag, className):
     # Open the URL and parse the HTML using Beautiful Soup
     page = urllib.urlopen(url)
@@ -58,11 +56,9 @@ def writeToFile(object, filename):
             f.write(str(item) + "\n")
 
 # Define the default route for the web application
-
-
 @app.route('/')
 @cross_origin()
-def names():
+def getData():
     govPage = 'https://www.gov.uk/government/ministers'
 
     # Call the getAttributes function to extract names, roles, and images

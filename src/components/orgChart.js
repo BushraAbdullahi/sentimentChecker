@@ -18,7 +18,7 @@ const OrgChart = () => {
         {Object.entries(data).map(([key, value], index) => (
           <div className="card" key={key}>
             <div className="circle">
-              <img src={value.image} alt={value.name} />
+              <img src={value.img_src} alt={value.name} />
             </div>
             <h2>{value.name}</h2>
             <h3>{value.role}</h3>

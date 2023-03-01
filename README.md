@@ -11,10 +11,10 @@ To run this app on your local machine, follow the steps below:
 3. Install the necessary packages: `npm install`
 4. Run this command: `export FLASK_APP=api.py`
 5. Navigate to the backend directory: `cd api`
-6. Install virtualenv: `pip install virtualenv`
+6. Install virtualenv: `pip3 install virtualenv`
 7. Set up a virtual environment: `virtualenv venv`
 8. Activate venv: `source venv/bin/activate`
-9. Install the necessary packages: `pip install -r requirements.txt`
+9. Install the necessary packages: `pip3 install -r requirements.txt`
 10. Start the front and back-end servers: `npm start`
 11. Open your browser and navigate to http://localhost:3000
 

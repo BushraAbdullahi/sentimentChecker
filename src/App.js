@@ -1,6 +1,6 @@
-import React from "react";
-import "./App.css";
-import OrgChart from "./components/orgChart";
+import React from 'react'
+import './App.css'
+import OrgChart from './components/orgChart'
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
         <OrgChart />
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
