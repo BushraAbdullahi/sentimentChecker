@@ -1,9 +1,15 @@
 import json
+import methods
 from flask import Flask
 from flask_cors import CORS, cross_origin
 from flask import jsonify
 from bs4 import BeautifulSoup
 import urllib.request as urllib
+import nltk
+nltk.download('punkt')
+nltk.download('vader_lexicon')
+nltk.download('wordnet')
+nltk.download('stopwords')
 
 # Import Flask and CORS libraries
 app = Flask(__name__)
@@ -42,8 +48,6 @@ def getAttributes(url, tag, className):
     return textList
 
 # Define function to write a list of objects to a file
-
-
 def writeToFile(data_list, filename):
     # Open the file for writing
     with open(filename, "w") as f:
@@ -70,9 +74,36 @@ def getData():
             "img_src": image["img_src"]
         })
     # Write the names, roles, and images to separate files
-    writeToFile(combined_list, "combined_list.json")
+    writeToFile(combined_list, "json_files/combined_list.json")
 
     # Return a JSON object containing the image URLs
     return jsonify(combined_list)
 
+@app.route('/sentiments')
+@cross_origin()
+def getSentiments():
+    # Load the tweets from the JSON file
+    with open('json_files/tweet_dict.json') as f:
+        tweet_texts = json.load(f)
 
+    # Iterate over the keys of the tweet_texts dictionary and clean the tweets
+    for key in tweet_texts:
+        tweet_texts[key] = methods.remove_retweets(tweet_texts[key])
+        tweet_texts[key] = methods.lowercase_tweets(tweet_texts[key])
+        tweet_texts[key] = methods.remove_punctuation(tweet_texts[key])
+        tweet_texts[key] = methods.remove_stop_words(tweet_texts[key])
+        tweet_texts[key] = methods.lemmatize_tweets(tweet_texts[key])
+        tweet_texts[key] = methods.remove_duplicates(tweet_texts[key])
+        
+    sentiments = {}
+    for tweet_key in tweet_texts.keys():
+        sentiments[tweet_key] = None
+
+    for key in sentiments:
+        sentiments[key] = methods.sentiment_checker(tweet_texts[key])
+
+    # Write tweet_dict to a JSON file
+    with open('json_files/sentiments.json', "w") as outfile:
+        json.dump(sentiments, outfile)
+    
+    return jsonify(sentiments)

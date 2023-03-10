@@ -7,7 +7,7 @@ nltk.download('wordnet')
 nltk.download('stopwords')
 
 # Load the tweets from the JSON file
-with open('./json_files/tweet_dict.json') as f:
+with open('json_files/tweet_dict.json') as f:
     tweet_texts = json.load(f)
 
 # Iterate over the keys of the tweet_texts dictionary and clean the tweets
@@ -27,5 +27,5 @@ for key in sentiments:
     sentiments[key] = methods.sentiment_checker(tweet_texts[key])
 
 # Write tweet_dict to a JSON file
-with open('./json_files/sentiments.json', "w") as outfile:
+with open('json_files/sentiments.json', "w") as outfile:
     json.dump(sentiments, outfile)
