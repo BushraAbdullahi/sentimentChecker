@@ -1,0 +1,117 @@
+{
+  "Rishi Sunak MP": {
+    "positive_percentage": 33.064516129032256,
+    "negative_percentage": 41.935483870967744,
+    "neutral_percentage": 25.0
+  },
+  "Dominic Raab MP": {
+    "positive_percentage": 40.0,
+    "negative_percentage": 45.0,
+    "neutral_percentage": 15.0
+  },
+  "Jeremy Hunt MP": {
+    "positive_percentage": 42.35807860262008,
+    "negative_percentage": 32.751091703056765,
+    "neutral_percentage": 24.890829694323145
+  },
+  "James Cleverly MP": {
+    "positive_percentage": 78.26086956521739,
+    "negative_percentage": 17.391304347826086,
+    "neutral_percentage": 4.3478260869565215
+  },
+  "Suella Braverman KC MP": {
+    "positive_percentage": 0.0,
+    "negative_percentage": 50.0,
+    "neutral_percentage": 50.0
+  },
+  "Ben Wallace MP": {
+    "positive_percentage": 70.0,
+    "negative_percentage": 20.0,
+    "neutral_percentage": 10.0
+  },
+  "Oliver Dowden CBE MP": {
+    "positive_percentage": 100.0,
+    "negative_percentage": 0.0,
+    "neutral_percentage": 0.0
+  },
+  "Grant Shapps MP": {
+    "positive_percentage": 72.91666666666666,
+    "negative_percentage": 20.833333333333336,
+    "neutral_percentage": 6.25
+  },
+  "Michelle Donelan MP": {
+    "positive_percentage": 73.07692307692307,
+    "negative_percentage": 21.153846153846153,
+    "neutral_percentage": 5.769230769230769
+  },
+  "Michael Gove MP": {
+    "positive_percentage": 47.5,
+    "negative_percentage": 30.0,
+    "neutral_percentage": 22.5
+  },
+  "Steve Barclay MP": {
+    "positive_percentage": 47.05882352941176,
+    "negative_percentage": 52.94117647058824,
+    "neutral_percentage": 0.0
+  },
+  "Penny Mordaunt MP": {
+    "positive_percentage": 56.41025641025641,
+    "negative_percentage": 35.8974358974359,
+    "neutral_percentage": 7.6923076923076925
+  },
+  "Lord True CBE": {
+    "positive_percentage": 0,
+    "negative_percentage": 0,
+    "neutral_percentage": 0
+  },
+  "Kemi Badenoch MP": {
+    "positive_percentage": 26.666666666666668,
+    "negative_percentage": 41.66666666666667,
+    "neutral_percentage": 31.666666666666664
+  },
+  "Th\u00e9r\u00e8se Coffey MP": {
+    "positive_percentage": 33.33333333333333,
+    "negative_percentage": 43.333333333333336,
+    "neutral_percentage": 23.333333333333332
+  },
+  "Mel Stride MP": {
+    "positive_percentage": 28.57142857142857,
+    "negative_percentage": 0.0,
+    "neutral_percentage": 71.42857142857143
+  },
+  "Gillian Keegan MP": {
+    "positive_percentage": 81.0,
+    "negative_percentage": 7.000000000000001,
+    "neutral_percentage": 12.0
+  },
+  "Mark Harper MP": {
+    "positive_percentage": 30.357142857142854,
+    "negative_percentage": 45.535714285714285,
+    "neutral_percentage": 24.107142857142858
+  },
+  "Lucy Frazer KC MP": {
+    "positive_percentage": 100.0,
+    "negative_percentage": 0.0,
+    "neutral_percentage": 0.0
+  },
+  "Greg Hands MP": {
+    "positive_percentage": 81.48148148148148,
+    "negative_percentage": 7.4074074074074066,
+    "neutral_percentage": 11.11111111111111
+  },
+  "Chris Heaton-Harris MP": {
+    "positive_percentage": 71.42857142857143,
+    "negative_percentage": 28.57142857142857,
+    "neutral_percentage": 0.0
+  },
+  "Alister Jack MP": {
+    "positive_percentage": 22.727272727272727,
+    "negative_percentage": 31.818181818181817,
+    "neutral_percentage": 45.45454545454545
+  },
+  "David TC Davies MP": {
+    "positive_percentage": 0.0,
+    "negative_percentage": 100.0,
+    "neutral_percentage": 0.0
+  }
+}

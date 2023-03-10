@@ -20,7 +20,7 @@ API_secret_key = os.getenv('API_secret_key')
 Access_Token = os.getenv('Access_Token')
 Access_Token_Secret = os.getenv('Access_Token_Secret')
 
-def get_tweets(query, tweet_count=2500):
+def get_tweets(query, tweet_count=1000):
     # Authenticate to Twitter
     auth = tweepy.OAuthHandler(Api_key, API_secret_key)
     auth.set_access_token(Access_Token, Access_Token_Secret)
@@ -35,12 +35,6 @@ def get_tweets(query, tweet_count=2500):
 
     # Return the tweets
     return tweets
-
-
-tweets = get_tweets('Rishi Sunak')
-tweet_texts = [tweet.full_text for tweet in tweets]
-
-
 
 # Cleaning the data
 
@@ -63,9 +57,6 @@ def remove_retweets(tweets):
     
     # Return the tweets without the retweet text
     return tweets_without_retweets
-tweets_without_retweets = remove_retweets(tweet_texts)
-
-
 
 def lowercase_tweets(tweets):
     # Create a list to store the lowercased tweets
@@ -78,9 +69,6 @@ def lowercase_tweets(tweets):
     
     # Return the lowercased tweets
     return lowercased_tweets
-lower_tweets = lowercase_tweets(tweets_without_retweets)
-
-
 
 def remove_punctuation(tweets):
 
@@ -97,9 +85,6 @@ def remove_punctuation(tweets):
     
     # Return the tweets without punctuation
     return tweets_without_punctuation
-tweets_without_punctuation = remove_punctuation(lower_tweets)
-
-
 
 def remove_stop_words(tweets):
     # Get the English stop words
@@ -124,9 +109,6 @@ def remove_stop_words(tweets):
     
     # Return the tweets without stop words
     return tweets_without_stop_words
-tweets_without_stop_words = remove_stop_words(tweets_without_punctuation)
-
-
 
 def lemmatize_tweets(tweets):
     # Initialize the WordNetLemmatizer
@@ -148,9 +130,6 @@ def lemmatize_tweets(tweets):
 
     # Return the lemmatized tweets
     return lemmatized_tweets
-lemmatized_tweets = lemmatize_tweets(tweets_without_stop_words)
-
-
 
 def remove_duplicates(tweets_list):
     unique_tweets = []
@@ -158,12 +137,11 @@ def remove_duplicates(tweets_list):
         if tweet not in unique_tweets:
             unique_tweets.append(tweet)
     return unique_tweets
-unique_tweets = remove_duplicates(lemmatized_tweets)
-
-
 
 # Sentiment Analysis
+
 def sentiment_checker(tweets):
+    
     # Create a SentimentIntensityAnalyzer object
     sentiment_analyzer = SentimentIntensityAnalyzer()
     
@@ -189,14 +167,16 @@ def sentiment_checker(tweets):
     total_tweets = positive_tweets + negative_tweets + neutral_tweets
     
     # Calculate the percentage of tweets that are positive, negative, and neutral
-    positive_percentage = (positive_tweets / total_tweets) * 100
-    negative_percentage = (negative_tweets / total_tweets) * 100
-    neutral_percentage = (neutral_tweets / total_tweets) * 100
+    try:
+        positive_percentage = (positive_tweets / total_tweets) * 100
+        negative_percentage = (negative_tweets / total_tweets) * 100
+        neutral_percentage = (neutral_tweets / total_tweets) * 100
+    except ZeroDivisionError:
+        return {'positive_percentage': 0,
+                'negative_percentage': 0,
+                'neutral_percentage': 0}
     
     # Return the percentages
     return {'positive_percentage': positive_percentage,
             'negative_percentage': negative_percentage,
             'neutral_percentage': neutral_percentage}
-sentiments = sentiment_checker(unique_tweets)
-print(sentiments)
-

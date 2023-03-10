@@ -44,16 +44,11 @@ def getAttributes(url, tag, className):
 # Define function to write a list of objects to a file
 
 
-def writeToFile(object, filename):
+def writeToFile(data_list, filename):
     # Open the file for writing
     with open(filename, "w") as f:
-        # Loop through each item in the list
-        for item in object:
-            # If the item is a dictionary, convert it to a string with JSON
-            if isinstance(item, dict):
-                item = json.dumps(item)
-            # Write the item to the file
-            f.write(str(item) + "\n")
+        # Write the data list as a JSON array to the file
+        json.dump(data_list, f)
 
 # Define the default route for the web application
 @app.route('/')
