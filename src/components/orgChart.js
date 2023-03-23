@@ -26,9 +26,9 @@ const OrgChart = () => {
 
   function getSentimentValue(key, sentiment) {
     if (sentiments[key] && sentiments[key][sentiment]) {
-      return sentiments[key][sentiment];
+      return sentiments[key][sentiment]
     }
-    return null;
+    return null
   }
 
   return (
@@ -40,25 +40,15 @@ const OrgChart = () => {
           </div>
           <h2>{value.name}</h2>
           <h3>{value.role}</h3>
-          <div className="progress" style={{ maxWidth: '60%' }}>
-            <div
-              className="progress-bar"
-              style={{ width: getSentimentValue(key, "positive_percentage"), backgroundColor: '#018a16' }}
-            >
-              {getSentimentValue(key, "positive_percentage")}
-              {console.log(getSentimentValue(key, "positive_percentage"))}
+          <div className="progress" style={{ maxWidth: '50%' }}>
+            <div class="progress-bar bg-success" style={{ width: String(getSentimentValue(value.name, 'positive_percentage')) }}>
+            {getSentimentValue(value.name, 'positive_percentage')}
             </div>
-            <div
-              className="progress-bar"
-              style={{ width: getSentimentValue(key, "neutral_percentage"), backgroundColor: '#ded414' }}
-            >
-              {getSentimentValue(key, "neutral_percentage")}
+            <div class="progress-bar bg-warning" style={{ width: String(getSentimentValue(value.name, 'neutral_percentage')) }}>
+            {getSentimentValue(value.name, 'neutral_percentage')}
             </div>
-            <div
-              className="progress-bar"
-              style={{ width: getSentimentValue(key, "negative_percentage"), backgroundColor: '#ad0202' }}
-            >
-              {getSentimentValue(key, "negative_percentage")}
+            <div class="progress-bar bg-danger" style={{ width: String(getSentimentValue(value.name, 'negative_percentage')) }}>
+            {getSentimentValue(value.name, 'negative_percentage')}
             </div>
           </div>
         </div>

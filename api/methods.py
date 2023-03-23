@@ -177,6 +177,6 @@ def sentiment_checker(tweets):
                 'neutral_percentage': 0}
     
     # Return the percentages
-    return {'positive_percentage': positive_percentage,
-            'negative_percentage': negative_percentage,
-            'neutral_percentage': neutral_percentage}
+    return {'positive_percentage': round(positive_percentage, 1),
+            'negative_percentage': round(negative_percentage, 1),
+            'neutral_percentage': round(neutral_percentage, 1)}
