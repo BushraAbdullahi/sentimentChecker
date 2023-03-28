@@ -10,7 +10,7 @@ const OrgChart = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/ministers')
+      .get('https://sentiment-checker.herokuapp.com/ministers')
       .then((res) => setMinisters(res.data))
       .catch((err) => console.error(err))
   }, [])
@@ -20,7 +20,7 @@ const OrgChart = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/sentiments')
+      .get('https://sentiment-checker.herokuapp.com/sentiments')
       .then((res) => setSentiments(res.data))
       .catch((err) => console.error(err))
   }, [])
