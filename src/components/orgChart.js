@@ -10,7 +10,7 @@ const OrgChart = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/')
+      .get('http://localhost:5000/ministers')
       .then((res) => setMinisters(res.data))
       .catch((err) => console.error(err))
   }, [])

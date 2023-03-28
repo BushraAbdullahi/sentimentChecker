@@ -1,6 +1,7 @@
 import json
 import methods
 from flask import Flask
+from flask.helpers import send_from_directory
 from flask_cors import CORS, cross_origin
 from flask import jsonify
 from bs4 import BeautifulSoup
@@ -12,8 +13,8 @@ nltk.download('wordnet')
 nltk.download('stopwords')
 
 # Import Flask and CORS libraries
-app = Flask(__name__)
-cors = CORS(app)
+app = Flask(__name__, static_folder='../build')
+CORS(app)
 
 # Define function to scrape attributes from HTML using Beautiful Soup
 def getAttributes(url, tag, className):
@@ -55,7 +56,7 @@ def writeToFile(data_list, filename):
         json.dump(data_list, f)
 
 # Define the default route for the web application
-@app.route('/')
+@app.route('/ministers')
 @cross_origin()
 def getData():
     govPage = 'https://www.gov.uk/government/ministers'
@@ -107,3 +108,11 @@ def getSentiments():
         json.dump(sentiments, outfile)
     
     return jsonify(sentiments)
+
+
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
+
+if __name__ == '__main__':
+    app.run()
