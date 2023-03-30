@@ -4,4 +4,4 @@ Flask==2.2.2
 Flask-Cors==3.0.10
 nltk==3.8.1
 tweepy==4.12.1
-python-dotenv==1.0.0
+python-dotenv==0.21.1
