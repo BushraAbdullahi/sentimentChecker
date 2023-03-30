@@ -25,6 +25,6 @@ yarn-error.log*
 api/notebook.ipynb
 api/.env
 
-
+__pycache__/
 
 
