@@ -14,7 +14,7 @@ nltk.download('wordnet')
 nltk.download('stopwords')
 
 # Import Flask and CORS libraries
-app = Flask(__name__, static_folder='../build')
+app = Flask(__name__, static_folder='../build', static_url_path='')
 CORS(app)
 
 # Define function to scrape attributes from HTML using Beautiful Soup
