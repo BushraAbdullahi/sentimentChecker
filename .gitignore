@@ -26,5 +26,6 @@ api/notebook.ipynb
 api/.env
 
 __pycache__/
+venv/
 
 
