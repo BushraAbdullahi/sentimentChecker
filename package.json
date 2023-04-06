@@ -21,12 +21,11 @@
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
-    "start": "concurrently \"npm run start-client\" \"npm run start-backend\"",
-    "start-client": "react-scripts start",
-    "start-backend": "cd api && venv/bin/flask run --no-debugger",
+    "start": "cd api && python api.py",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "cd api && pip install -r requirements.txt"
   },
   "eslintConfig": {
     "extends": [
