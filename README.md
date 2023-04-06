@@ -35,3 +35,24 @@ If you would like to contribute to this project, please follow the steps below:
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more information.
+
+
+## Running locally
+
+Start the database:
+
+```shell
+docker-compose up -d
+```
+
+Build the react app
+
+```shell
+npm run build
+```
+
+Run the flask application
+
+```shell
+npm start
+```
