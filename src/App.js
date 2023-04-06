@@ -4,7 +4,7 @@ import OrgChart from './components/orgChart'
 
 function App() {
   return (
-    <div class="box">
+    <div className="box">
       <div className="App">
         <OrgChart />
       </div>
