@@ -20,7 +20,7 @@ API_secret_key = os.getenv('API_secret_key')
 Access_Token = os.getenv('Access_Token')
 Access_Token_Secret = os.getenv('Access_Token_Secret')
 
-def get_tweets(query, tweet_count=1000):
+def get_tweets(query, tweet_count=5):
     # Authenticate to Twitter
     auth = tweepy.OAuthHandler(Api_key, API_secret_key)
     auth.set_access_token(Access_Token, Access_Token_Secret)

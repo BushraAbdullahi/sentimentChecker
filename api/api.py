@@ -1,22 +1,55 @@
-import json
 import methods
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask.helpers import send_from_directory
 from flask_cors import CORS, cross_origin
 from flask import jsonify
 from bs4 import BeautifulSoup
+from sqlalchemy import create_engine, Column, Integer, String, Numeric
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import distinct, func
 import urllib.request as urllib
 import nltk
+
 nltk.download('punkt')
 nltk.download('vader_lexicon')
 nltk.download('wordnet')
 nltk.download('stopwords')
+load_dotenv()
 
 # Import Flask and CORS libraries
 app = Flask(__name__, static_folder='../build', static_url_path='')
 CORS(app)
 
+engine = create_engine(os.getenv('DATABASE_URL'))
+Session = sessionmaker(bind=engine)
+session = Session()
+
+Base = declarative_base()
+
+class CabinetMinister(Base):
+    __tablename__ = 'cabinet_ministers'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    role = Column(String)
+    img_src = Column(String)
+
+class Sentiment(Base):
+    __tablename__ = 'sentiments'
+    id = Column(Integer, primary_key=True)
+    minister = Column(String)
+    positive_score = Column(Numeric)
+    negative_score = Column(Numeric)
+    neutral_score = Column(Numeric)
+    
+class Tweets(Base):
+    __tablename__ = 'tweets'
+    id = Column(Integer, primary_key=True)
+    minister = Column(String)
+    tweet = Column(String)
+    
 # Define function to scrape attributes from HTML using Beautiful Soup
 def getAttributes(url, tag, className):
     # Open the URL and parse the HTML using Beautiful Soup
@@ -49,13 +82,7 @@ def getAttributes(url, tag, className):
     # Return a list of text or dictionary objects
     return textList
 
-# Define function to write a list of objects to a file
-def writeToFile(data_list, filename):
-    # Open the file for writing
-    with open(filename, "w") as f:
-        # Write the data list as a JSON array to the file
-        json.dump(data_list, f)
-
+  
 # Define the default route for the web application
 @app.route('/ministers')
 @cross_origin()
@@ -75,20 +102,36 @@ def getData():
             "role": role,
             "img_src": image["img_src"]
         })
-    # Write the names, roles, and images to separate files
-    writeToFile(combined_list, "json_files/combined_list.json")
+    
+    # Delete all existing rows in the CabinetMinister table
+    session.query(CabinetMinister).delete()
+    
+    session.commit()
 
-    # Return a JSON object containing the image URLs
-    return jsonify(combined_list)
+    # Write the names, roles, and images to the CabinetMinister table
+    for data in combined_list:
+        minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'])
+        session.merge(minister)
+    
+    session.commit()
+
 
 @app.route('/sentiments')
 @cross_origin()
 def getSentiments():
-    # Load the tweets from the JSON file
-    with open('json_files/tweet_dict.json') as f:
-        tweet_texts = json.load(f)
+    # Query all tweets from the Tweets table
+    tweets = session.query(Tweets).all()
 
-    # Iterate over the keys of the tweet_texts dictionary and clean the tweets
+    tweet_texts = {}
+    
+    for tweet in tweets:
+        minister = tweet.minister
+        if minister in tweet_texts:
+            tweet_texts[minister].append(tweet.tweet)
+        else:
+            tweet_texts[minister] = [tweet.tweet]
+
+    # Perform sentiment analysis on each tweet
     for key in tweet_texts:
         tweet_texts[key] = methods.remove_retweets(tweet_texts[key])
         tweet_texts[key] = methods.lowercase_tweets(tweet_texts[key])
@@ -97,18 +140,30 @@ def getSentiments():
         tweet_texts[key] = methods.lemmatize_tweets(tweet_texts[key])
         tweet_texts[key] = methods.remove_duplicates(tweet_texts[key])
         
-    sentiments = {}
-    for tweet_key in tweet_texts.keys():
-        sentiments[tweet_key] = None
+        sentiments = {}
+        for tweet_key in tweet_texts.keys():
+            sentiments[tweet_key] = None
 
-    for key in sentiments:
-        sentiments[key] = methods.sentiment_checker(tweet_texts[key])
+        for key in sentiments:
+            sentiments[key] = methods.sentiment_checker(tweet_texts[key])
 
-    # Write tweet_dict to a JSON file
-    with open('json_files/sentiments.json', "w") as outfile:
-        json.dump(sentiments, outfile)
-    
-    return jsonify(sentiments)
+    # Insert sentiment scores into the Sentiment table
+    session.query(Sentiment).delete()
+    for key, sentiment_scores in sentiments.items():
+        positive_score = sentiment_scores['positive_percentage']
+        negative_score = sentiment_scores['negative_percentage']
+        neutral_score = sentiment_scores['neutral_percentage']
+
+        sentiment = Sentiment(
+            minister=key,
+            positive_score=positive_score,
+            negative_score=negative_score,
+            neutral_score=neutral_score
+        )
+        session.add(sentiment)
+
+    session.commit()
+   
 
 
 @app.route('/')
