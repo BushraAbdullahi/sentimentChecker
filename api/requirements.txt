@@ -5,3 +5,5 @@ Flask-Cors==3.0.10
 nltk==3.8.1
 tweepy==4.12.1
 python-dotenv==0.21.1
+sqlalchemy==2.0.13
+psycopg2-binary==2.9.6
