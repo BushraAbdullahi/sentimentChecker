@@ -1,4 +1,5 @@
 import methods
+import json
 import os
 from dotenv import load_dotenv
 from flask import Flask
@@ -114,6 +115,8 @@ def getData():
         session.merge(minister)
     
     session.commit()
+    
+    return jsonify(combined_list)
 
 
 @app.route('/sentiments')
@@ -163,8 +166,9 @@ def getSentiments():
         session.add(sentiment)
 
     session.commit()
+    
+    return jsonify(sentiments)
    
-
 
 @app.route('/')
 def serve():
