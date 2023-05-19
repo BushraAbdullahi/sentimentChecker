@@ -10,7 +10,7 @@ from flask import jsonify
 from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String, Numeric
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 import urllib.request as urllib
 import nltk
 
@@ -89,7 +89,7 @@ def getAttributes(url, tag, className):
 def getData():
     # Create a new session within the Flask app context
     with app.app_context():
-        Session = scoped_session(db.session_factory)
+        Session = sessionmaker(bind=db.engine)
         session = Session()
 
         govPage = 'https://www.gov.uk/government/ministers'
@@ -130,7 +130,7 @@ def getData():
 def getSentiments():
     # Create a new session within the Flask app context
     with app.app_context():
-        Session = scoped_session(db.session_factory)
+        Session = sessionmaker(bind=db.engine)
         session = Session()
 
         # Query all tweets from the Tweets table
