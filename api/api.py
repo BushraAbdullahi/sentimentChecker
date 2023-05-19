@@ -10,7 +10,6 @@ from flask import jsonify
 from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String, Numeric
 from sqlalchemy.orm import declarative_base
-from flask_sqlalchemy import SQLAlchemy
 import urllib.request as urllib
 import nltk
 
