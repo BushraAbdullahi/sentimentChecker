@@ -1,16 +1,16 @@
 import methods
 import json
 import os
+from database import db
 from dotenv import load_dotenv
 from flask import Flask
 from flask.helpers import send_from_directory
 from flask_cors import CORS, cross_origin
 from flask import jsonify
 from bs4 import BeautifulSoup
-from sqlalchemy import create_engine, Column, Integer, String, Numeric
+from sqlalchemy import Column, Integer, String, Numeric
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import distinct, func
+from flask_sqlalchemy import SQLAlchemy
 import urllib.request as urllib
 import nltk
 
@@ -24,9 +24,8 @@ load_dotenv()
 app = Flask(__name__, static_folder='../build', static_url_path='')
 CORS(app)
 
-engine = create_engine(os.getenv('DATABASE_URL'))
-Session = sessionmaker(bind=engine)
-session = Session()
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+db.init_app(app)
 
 Base = declarative_base()
 
@@ -88,87 +87,102 @@ def getAttributes(url, tag, className):
 @app.route('/ministers')
 @cross_origin()
 def getData():
-    govPage = 'https://www.gov.uk/government/ministers'
+    # Create a new session within the Flask app context
+    with app.app_context():
+        Session = db.create_scoped_session(options={"bind": db.engine})
+        session = Session()
 
-    # Call the getAttributes function to extract names, roles, and images
-    names = getAttributes(govPage, 'span', 'app-person-link__name')
-    roles = getAttributes(govPage, 'a', 'govuk-link')
-    images = getAttributes(govPage, 'img', '')
+        govPage = 'https://www.gov.uk/government/ministers'
 
-    combined_list = []
-    # Combine the names, roles, and images into a single list of dictionaries
-    for name, role, image in zip(names, roles, images):
-        combined_list.append({
-            "name": name,
-            "role": role,
-            "img_src": image["img_src"]
-        })
-    
-    # Delete all existing rows in the CabinetMinister table
-    session.query(CabinetMinister).delete()
-    
-    session.commit()
+        # Call the getAttributes function to extract names, roles, and images
+        names = getAttributes(govPage, 'span', 'app-person-link__name')
+        roles = getAttributes(govPage, 'a', 'govuk-link')
+        images = getAttributes(govPage, 'img', '')
 
-    # Write the names, roles, and images to the CabinetMinister table
-    for data in combined_list:
-        minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'])
-        session.merge(minister)
-    
-    session.commit()
-    
+        combined_list = []
+        # Combine the names, roles, and images into a single list of dictionaries
+        for name, role, image in zip(names, roles, images):
+            combined_list.append({
+                "name": name,
+                "role": role,
+                "img_src": image["img_src"]
+            })
+
+        # Delete all existing rows in the CabinetMinister table
+        session.query(CabinetMinister).delete()
+        session.commit()
+
+        # Write the names, roles, and images to the CabinetMinister table
+        for data in combined_list:
+            minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'])
+            session.merge(minister)
+
+        session.commit()
+
+        # Close the session
+        session.close()
+
     return jsonify(combined_list)
 
 
 @app.route('/sentiments')
 @cross_origin()
 def getSentiments():
-    # Query all tweets from the Tweets table
-    tweets = session.query(Tweets).all()
+    # Create a new session within the Flask app context
+    with app.app_context():
+        Session = db.create_scoped_session(options={"bind": db.engine})
+        session = Session()
 
-    tweet_texts = {}
-    
-    for tweet in tweets:
-        minister = tweet.minister
-        if minister in tweet_texts:
-            tweet_texts[minister].append(tweet.tweet)
-        else:
-            tweet_texts[minister] = [tweet.tweet]
+        # Query all tweets from the Tweets table
+        tweets = session.query(Tweets).all()
 
-    # Perform sentiment analysis on each tweet
-    for key in tweet_texts:
-        tweet_texts[key] = methods.remove_retweets(tweet_texts[key])
-        tweet_texts[key] = methods.lowercase_tweets(tweet_texts[key])
-        tweet_texts[key] = methods.remove_punctuation(tweet_texts[key])
-        tweet_texts[key] = methods.remove_stop_words(tweet_texts[key])
-        tweet_texts[key] = methods.lemmatize_tweets(tweet_texts[key])
-        tweet_texts[key] = methods.remove_duplicates(tweet_texts[key])
-        
-        sentiments = {}
-        for tweet_key in tweet_texts.keys():
-            sentiments[tweet_key] = None
+        tweet_texts = {}
 
-        for key in sentiments:
-            sentiments[key] = methods.sentiment_checker(tweet_texts[key])
+        for tweet in tweets:
+            minister = tweet.minister
+            if minister in tweet_texts:
+                tweet_texts[minister].append(tweet.tweet)
+            else:
+                tweet_texts[minister] = [tweet.tweet]
 
-    # Insert sentiment scores into the Sentiment table
-    session.query(Sentiment).delete()
-    for key, sentiment_scores in sentiments.items():
-        positive_score = sentiment_scores['positive_percentage']
-        negative_score = sentiment_scores['negative_percentage']
-        neutral_score = sentiment_scores['neutral_percentage']
+        # Perform sentiment analysis on each tweet
+        for key in tweet_texts:
+            tweet_texts[key] = methods.remove_retweets(tweet_texts[key])
+            tweet_texts[key] = methods.lowercase_tweets(tweet_texts[key])
+            tweet_texts[key] = methods.remove_punctuation(tweet_texts[key])
+            tweet_texts[key] = methods.remove_stop_words(tweet_texts[key])
+            tweet_texts[key] = methods.lemmatize_tweets(tweet_texts[key])
+            tweet_texts[key] = methods.remove_duplicates(tweet_texts[key])
 
-        sentiment = Sentiment(
-            minister=key,
-            positive_score=positive_score,
-            negative_score=negative_score,
-            neutral_score=neutral_score
-        )
-        session.add(sentiment)
+            sentiments = {}
+            for tweet_key in tweet_texts.keys():
+                sentiments[tweet_key] = None
 
-    session.commit()
-    
+            for key in sentiments:
+                sentiments[key] = methods.sentiment_checker(tweet_texts[key])
+
+        # Insert sentiment scores into the Sentiment table
+        session.query(Sentiment).delete()
+        for key, sentiment_scores in sentiments.items():
+            positive_score = sentiment_scores['positive_percentage']
+            negative_score = sentiment_scores['negative_percentage']
+            neutral_score = sentiment_scores['neutral_percentage']
+
+            sentiment = Sentiment(
+                minister=key,
+                positive_score=positive_score,
+                negative_score=negative_score,
+                neutral_score=neutral_score
+            )
+            session.add(sentiment)
+
+        session.commit()
+
+        # Close the session
+        session.close()
+
     return jsonify(sentiments)
-   
+
 
 @app.route('/')
 def serve():
