@@ -3,6 +3,8 @@ from api import app, db
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from database import db
+import os
+
 
 from alembic import context
 
@@ -39,6 +41,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
+    config.set_main_option("sqlalchemy.url", os.environ.get('DATABASE_URL'))
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,

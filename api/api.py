@@ -13,6 +13,7 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 import urllib.request as urllib
 import nltk
+import alembic.config
 
 nltk.download('punkt')
 nltk.download('vader_lexicon')
@@ -190,4 +191,5 @@ def serve():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000)) # Get the port number from the environment variable, or use 5000 as default
+    alembic.config.main(argv=['--raiseerr','upgrade', 'head'])
     app.run(host='0.0.0.0', port=port)
