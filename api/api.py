@@ -14,6 +14,8 @@ from sqlalchemy.orm import sessionmaker
 import urllib.request as urllib
 import nltk
 import alembic.config
+from datetime import datetime
+from get_tweets import update_tweets
 
 nltk.download('punkt')
 nltk.download('vader_lexicon')
@@ -183,6 +185,17 @@ def getSentiments():
         session.close()
 
     return jsonify(sentiments)
+
+SECRET_TOKEN = os.getenv('SECRET_TOKEN')
+current_date = datetime.today().strftime('%d-%m-%Y')
+@app.route('/update_tweets', methods=['POST'])
+def flask_update_tweets():
+    auth_token = request.headers.get('Authorization')
+    if auth_token == SECRET_TOKEN:
+        update_tweets()  # Call the function that updates the tweets
+        return f'Updated {current_date}', 200
+    else:
+        return 'Unauthorized', 403
 
 
 @app.route('/')
