@@ -35,6 +35,8 @@ const OrgChart = () => {
 
   return (
     <div className="org-chart">
+      <h1>Government Minister Sentiment Analysis</h1>
+      <p>This chart displays sentiment analysis of tweets from various government ministers.</p>
       {Object.entries(ministers).map(([key, value], index) => {
         const positive_percentage = getSentimentValue(
           value.name,
