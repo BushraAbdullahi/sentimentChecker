@@ -1,0 +1,12 @@
+.appHeader {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background:rgba(127, 110, 255);
+    height: 100%; /* Ensure full height */
+  }
+  
+  .headerContent {
+    text-align: center;
+  }
+  
