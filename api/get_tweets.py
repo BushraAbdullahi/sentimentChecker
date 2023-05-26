@@ -22,6 +22,7 @@ class Tweets(Base):
     minister = Column(String)
     tweet = Column(String)
 
+
 engine = create_engine(os.getenv('DATABASE_URL'))
 Session = sessionmaker(bind=engine)
 
@@ -34,10 +35,11 @@ def update_tweets():
 
     for minister in session.query(CabinetMinister).all():
         minister_name = minister.name
-        tweets = get_tweets(minister_name, tweet_count=5)  # Adjust tweet_count as needed
-
+        tweets = get_tweets(minister_name, tweet_count=5)  
         for tweet in tweets:
             tweet_data = Tweets(minister=minister_name, tweet=tweet.full_text)
             session.add(tweet_data)
 
     session.commit()
+    
+update_tweets()

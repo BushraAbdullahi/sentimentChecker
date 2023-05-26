@@ -1,6 +1,7 @@
 import methods
 import json
 import os
+from flask import request
 from database import db
 from dotenv import load_dotenv
 from flask import Flask
@@ -52,6 +53,11 @@ class Tweets(Base):
     id = Column(Integer, primary_key=True)
     minister = Column(String)
     tweet = Column(String)
+
+class UpdateDate(Base):
+    __tablename__ = 'update_date'
+    id = Column(Integer, primary_key=True)
+    date = Column(String)
     
 # Define function to scrape attributes from HTML using Beautiful Soup
 def getAttributes(url, tag, className):
@@ -59,8 +65,8 @@ def getAttributes(url, tag, className):
     page = urllib.urlopen(url)
     soup = BeautifulSoup(page, 'html.parser')
 
-    # Find the relevant HTML tag and class
-    cabinet_list = soup.find('ul', {'class': 'cabinet-list'})
+    # Find the relevant HTML tag and id
+    cabinet_list = soup.find('ul', {'id': 'cabinet'})
 
     # Initialize an empty list to store text or dictionary objects
     textList = []
@@ -68,10 +74,10 @@ def getAttributes(url, tag, className):
     # If tag is 'img', extract image and name information from each list item
     if tag == 'img':
         for cabinet_member in cabinet_list.find_all('li'):
-            text = cabinet_member.find(tag)
+            text = cabinet_member.find('a', {'class': 'gem-c-image-card__title-link govuk-link'})
             img = cabinet_member.find('img')
             if text and img:
-                name_str = img.get('alt')
+                name_str = text.text
                 img_src = img.get('src')
                 textList.append({'name': name_str.replace(
                     'The Rt Hon ', ''), 'img_src': img_src})
@@ -98,8 +104,8 @@ def getData():
         govPage = 'https://www.gov.uk/government/ministers'
 
         # Call the getAttributes function to extract names, roles, and images
-        names = getAttributes(govPage, 'span', 'app-person-link__name')
-        roles = getAttributes(govPage, 'a', 'govuk-link')
+        names = getAttributes(govPage, 'a', 'gem-c-image-card__title-link govuk-link')
+        roles = getAttributes(govPage, 'div', 'gem-c-image-card__description')
         images = getAttributes(govPage, 'img', '')
 
         combined_list = []
@@ -149,6 +155,7 @@ def getSentiments():
                 tweet_texts[minister] = [tweet.tweet]
 
         # Perform sentiment analysis on each tweet
+        sentiments = {}
         for key in tweet_texts:
             tweet_texts[key] = methods.remove_retweets(tweet_texts[key])
             tweet_texts[key] = methods.lowercase_tweets(tweet_texts[key])
@@ -157,15 +164,16 @@ def getSentiments():
             tweet_texts[key] = methods.lemmatize_tweets(tweet_texts[key])
             tweet_texts[key] = methods.remove_duplicates(tweet_texts[key])
 
-            sentiments = {}
             for tweet_key in tweet_texts.keys():
                 sentiments[tweet_key] = None
 
             for key in sentiments:
                 sentiments[key] = methods.sentiment_checker(tweet_texts[key])
 
-        # Insert sentiment scores into the Sentiment table
         session.query(Sentiment).delete()
+        session.commit()
+        
+        # Insert sentiment scores into the Sentiment table
         for key, sentiment_scores in sentiments.items():
             positive_score = sentiment_scores['positive_percentage']
             negative_score = sentiment_scores['negative_percentage']
@@ -188,14 +196,25 @@ def getSentiments():
 
 SECRET_TOKEN = os.getenv('SECRET_TOKEN')
 current_date = datetime.today().strftime('%d-%m-%Y')
+
 @app.route('/update_tweets', methods=['POST'])
 def flask_update_tweets():
-    auth_token = request.headers.get('Authorization')
-    if auth_token == SECRET_TOKEN:
-        update_tweets()  # Call the function that updates the tweets
-        return f'Updated {current_date}', 200
-    else:
-        return 'Unauthorized', 403
+    with app.app_context():
+        Session = sessionmaker(bind=db.engine)
+        session = Session()
+
+        session.query(CabinetMinister).delete()
+        session.commit()
+
+        auth_token = request.headers.get('Authorization')
+        if auth_token == SECRET_TOKEN:
+            update_tweets()  # Call the function that updates the tweets
+            update_date = UpdateDate(date=current_date)  # Create an instance of UpdateDate
+            session.add(update_date)  # Add the instance, not the string
+            session.commit()
+            return f'Updated {current_date}', 200
+        else:
+            return 'Unauthorized', 403
 
 
 @app.route('/')
