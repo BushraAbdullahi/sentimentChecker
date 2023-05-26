@@ -42,11 +42,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name='tweets_pkey')
     )
     
-    op.create_table('update_date',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id', name='update_date_pkey')
-    )
     # ### end Alembic commands ###
 
 
@@ -55,4 +50,4 @@ def downgrade() -> None:
     op.drop_table('cabinet_ministers')
     op.drop_table('sentiments')
     op.drop_table('tweets')
-    op.drop_table('update_date')
+

@@ -53,11 +53,8 @@ class Tweets(Base):
     id = Column(Integer, primary_key=True)
     minister = Column(String)
     tweet = Column(String)
+    dateTime = Column(String)
 
-class UpdateDate(Base):
-    __tablename__ = 'update_date'
-    id = Column(Integer, primary_key=True)
-    date = Column(String)
     
 # Define function to scrape attributes from HTML using Beautiful Soup
 def getAttributes(url, tag, className):
@@ -195,7 +192,7 @@ def getSentiments():
     return jsonify(sentiments)
 
 SECRET_TOKEN = os.getenv('SECRET_TOKEN')
-current_date = datetime.today().strftime('%d-%m-%Y')
+current_date = datetime.now().strftime('%d-%m-%Y %H:%M')
 
 @app.route('/update_tweets', methods=['POST'])
 def flask_update_tweets():
@@ -203,18 +200,27 @@ def flask_update_tweets():
         Session = sessionmaker(bind=db.engine)
         session = Session()
 
-        session.query(CabinetMinister).delete()
-        session.commit()
-
         auth_token = request.headers.get('Authorization')
         if auth_token == SECRET_TOKEN:
-            update_tweets()  # Call the function that updates the tweets
-            update_date = UpdateDate(date=current_date)  # Create an instance of UpdateDate
-            session.add(update_date)  # Add the instance, not the string
-            session.commit()
-            return f'Updated {current_date}', 200
+            update_tweets(session)  # Call the function that updates the tweets
+            return f'Last Updated: {current_date}', 200
         else:
             return 'Unauthorized', 403
+
+@app.route('/display_date')
+def display_date():
+    with app.app_context():
+        Session = sessionmaker(bind=db.engine)
+        session = Session()
+
+        # Query the Tweets table, order the data by id in descending order, and get the first entry
+        last_entry = session.query(Tweets).order_by(Tweets.id.desc()).first()
+
+        if last_entry:
+            return f'Last Updated: {last_entry.dateTime}'
+        else:
+            return 'No data found', 404
+        
 
 
 @app.route('/')

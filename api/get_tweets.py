@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base
 from methods import get_tweets
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -21,25 +22,24 @@ class Tweets(Base):
     id = Column(Integer, primary_key=True)
     minister = Column(String)
     tweet = Column(String)
+    dateTime = Column(String)
 
 
 engine = create_engine(os.getenv('DATABASE_URL'))
 Session = sessionmaker(bind=engine)
 
-def update_tweets():
-    session = Session()
-
-    # Delete all existing rows in the CabinetMinister table
+def update_tweets(session):
+    # Delete all existing rows in tweets table
     session.query(Tweets).delete()
     session.commit()
 
     for minister in session.query(CabinetMinister).all():
         minister_name = minister.name
-        tweets = get_tweets(minister_name, tweet_count=5)  
+        tweets = get_tweets(minister_name, tweet_count=5)
         for tweet in tweets:
-            tweet_data = Tweets(minister=minister_name, tweet=tweet.full_text)
+            current_datetime = datetime.now().strftime('%d-%m-%Y %H:%M')
+            tweet_data = Tweets(minister=minister_name, tweet=tweet.full_text, dateTime=current_datetime)
             session.add(tweet_data)
 
     session.commit()
     
-update_tweets()
