@@ -35,7 +35,7 @@ def update_tweets(session):
 
     for minister in session.query(CabinetMinister).all():
         minister_name = minister.name
-        tweets = get_tweets(minister_name, tweet_count=5)
+        tweets = get_tweets(minister_name, tweet_count=1000)
         for tweet in tweets:
             current_datetime = datetime.now().strftime('%d-%m-%Y %H:%M')
             tweet_data = Tweets(minister=minister_name, tweet=tweet.full_text, dateTime=current_datetime)
