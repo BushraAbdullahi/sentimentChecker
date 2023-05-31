@@ -1,5 +1,3 @@
-import methods
-import json
 import os
 from flask import request
 from database import db
@@ -16,7 +14,6 @@ import urllib.request as urllib
 import nltk
 import alembic.config
 from datetime import datetime
-from get_tweets import update_tweets
 
 nltk.download('punkt')
 nltk.download('vader_lexicon')
@@ -47,15 +44,8 @@ class Sentiment(Base):
     positive_score = Column(Numeric)
     negative_score = Column(Numeric)
     neutral_score = Column(Numeric)
-    
-class Tweets(Base):
-    __tablename__ = 'tweets'
-    id = Column(Integer, primary_key=True)
-    minister = Column(String)
-    tweet = Column(String)
     dateTime = Column(String)
-
-    
+        
 # Define function to scrape attributes from HTML using Beautiful Soup
 def getAttributes(url, tag, className):
     # Open the URL and parse the HTML using Beautiful Soup
@@ -139,73 +129,23 @@ def getSentiments():
         Session = sessionmaker(bind=db.engine)
         session = Session()
 
-        # Query all tweets from the Tweets table
-        tweets = session.query(Tweets).all()
+        # Query sentiment scores from the Sentiment table
+        sentiments = session.query(Sentiment).all()
 
-        tweet_texts = {}
+        sentiment_scores = {}
 
-        for tweet in tweets:
-            minister = tweet.minister
-            if minister in tweet_texts:
-                tweet_texts[minister].append(tweet.tweet)
-            else:
-                tweet_texts[minister] = [tweet.tweet]
-
-        # Perform sentiment analysis on each tweet
-        sentiments = {}
-        for key in tweet_texts:
-            tweet_texts[key] = methods.remove_retweets(tweet_texts[key])
-            tweet_texts[key] = methods.lowercase_tweets(tweet_texts[key])
-            tweet_texts[key] = methods.remove_punctuation(tweet_texts[key])
-            tweet_texts[key] = methods.remove_stop_words(tweet_texts[key])
-            tweet_texts[key] = methods.lemmatize_tweets(tweet_texts[key])
-            tweet_texts[key] = methods.remove_duplicates(tweet_texts[key])
-
-            for tweet_key in tweet_texts.keys():
-                sentiments[tweet_key] = None
-
-            for key in sentiments:
-                sentiments[key] = methods.sentiment_checker(tweet_texts[key])
-
-        session.query(Sentiment).delete()
-        session.commit()
-        
-        # Insert sentiment scores into the Sentiment table
-        for key, sentiment_scores in sentiments.items():
-            positive_score = sentiment_scores['positive_percentage']
-            negative_score = sentiment_scores['negative_percentage']
-            neutral_score = sentiment_scores['neutral_percentage']
-
-            sentiment = Sentiment(
-                minister=key,
-                positive_score=positive_score,
-                negative_score=negative_score,
-                neutral_score=neutral_score
-            )
-            session.add(sentiment)
-
-        session.commit()
+        for sentiment in sentiments:
+            minister = sentiment.minister
+            sentiment_scores[minister] = {
+                "positive_percentage": sentiment.positive_score,
+                "negative_percentage": sentiment.negative_score,
+                "neutral_percentage": sentiment.neutral_score
+            }
 
         # Close the session
         session.close()
 
-    return jsonify(sentiments)
-
-SECRET_TOKEN = os.getenv('SECRET_TOKEN')
-current_date = datetime.now().strftime('%d-%m-%Y %H:%M')
-
-@app.route('/update_tweets', methods=['POST'])
-def flask_update_tweets():
-    with app.app_context():
-        Session = sessionmaker(bind=db.engine)
-        session = Session()
-
-        auth_token = request.headers.get('Authorization')
-        if auth_token == SECRET_TOKEN:
-            update_tweets(session)  # Call the function that updates the tweets
-            return f'Last Updated: {current_date}', 200
-        else:
-            return 'Unauthorized', 403
+    return jsonify(sentiment_scores)
 
 @app.route('/display_date')
 def display_date():
@@ -213,8 +153,8 @@ def display_date():
         Session = sessionmaker(bind=db.engine)
         session = Session()
 
-        # Query the Tweets table, order the data by id in descending order, and get the first entry
-        last_entry = session.query(Tweets).order_by(Tweets.id.desc()).first()
+        # Query the sentiments table, order the data by id in descending order, and get the first entry
+        last_entry = session.query(Sentiment).order_by(Sentiment.id.desc()).first()
 
         if last_entry:
             return f'Last Updated: {last_entry.dateTime}'
