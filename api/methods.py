@@ -30,11 +30,15 @@ def get_tweets(query, tweet_count=5):
 
     # Use the Cursor object to get tweets matching the query
     tweets = []
-    for tweet in tweepy.Cursor(api.search_tweets, q=query, lang='en',result_type='recent',  tweet_mode='extended').items(tweet_count):
-        tweets.append(tweet)
+    for tweet in tweepy.Cursor(api.search_tweets, q=query, lang='en', result_type='recent', tweet_mode='extended').items(tweet_count):
+        if 'retweeted_status' in dir(tweet):   # If it's a retweet
+            tweets.append(tweet.retweeted_status.full_text)
+        else:                                  # If it's a normal tweet
+            tweets.append(tweet.full_text)
 
     # Return the tweets
     return tweets
+
 
 # Cleaning the data
 
