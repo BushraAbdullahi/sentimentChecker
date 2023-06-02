@@ -11,3 +11,4 @@ services:
       POSTGRES_DATABASE: db
     ports:
       - 5432:5432
+# psql -h localhost -d db -U db

@@ -10,6 +10,7 @@ load_dotenv()
 
 Base = declarative_base()
 
+
 class CabinetMinister(Base):
     __tablename__ = 'cabinet_ministers'
     id = Column(Integer, primary_key=True)
@@ -17,7 +18,6 @@ class CabinetMinister(Base):
     role = Column(String)
     img_src = Column(String)
     dateTime = Column(String)
-
 
 
 class Sentiment(Base):
@@ -44,6 +44,7 @@ def tweets(count):
 
     return all_tweets
 
+
 def clean_tweets(tweets_dict):
     cleaned_dict = {}
 
@@ -54,61 +55,60 @@ def clean_tweets(tweets_dict):
         tweets = methods.remove_stop_words(tweets)
         tweets = methods.lemmatize_tweets(tweets)
         cleaned_tweets = methods.remove_duplicates(tweets)
-        
+
         cleaned_dict[minister] = cleaned_tweets
 
     return cleaned_dict
+
 
 def scrape_and_store_ministers():
     session = Session()
 
     govPage = 'https://www.gov.uk/government/ministers'
 
-    # Call the getAttributes function to extract names, roles, and images
-    names = methods.getAttributes(govPage, 'a', 'gem-c-image-card__title-link govuk-link')
-    roles = methods.getAttributes(govPage, 'div', 'gem-c-image-card__description')
+    names = methods.getAttributes(
+        govPage, 'a', 'gem-c-image-card__title-link govuk-link')
+    roles = methods.getAttributes(
+        govPage, 'div', 'gem-c-image-card__description')
     images = methods.getAttributes(govPage, 'img', '')
 
     combined_list = []
-    # Combine the names, roles, and images into a single list of dictionaries
     for name, role, image in zip(names, roles, images):
         combined_list.append({
             "name": name,
             "role": role,
-            "img_src": image["img_src"]
+            "img_src": image["img_src"],
+            "dateTime": datetime.now().strftime('%d-%m-%Y %H:%M')  # Add the current time
         })
 
-    # Delete all existing rows in the CabinetMinister table
     session.query(CabinetMinister).delete()
     session.commit()
 
-    # Write the names, roles, and images to the CabinetMinister table
     for data in combined_list:
-        minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'])
+        minister = CabinetMinister(
+            name=data['name'],
+            role=data['role'],
+            img_src=data['img_src'],
+            dateTime=data['dateTime']  
+        )
         session.merge(minister)
 
     session.commit()
 
 
 def analyse_tweets():
-    # get tweets
     raw_tweets = tweets(1000)
 
-    # Clean tweets
     cleaned_dict = clean_tweets(raw_tweets)
 
-    # Iterate over each minister and their cleaned tweets
     for minister, cleaned_tweets in cleaned_dict.items():
-        # Open a DB session
         session = Session()
-        
-        # Delete all existing rows in the Sentiment table for the current minister
-        session.query(Sentiment).filter(Sentiment.minister == minister).delete()
 
-        # Apply sentiment analysis to the cleaned tweets
+        session.query(Sentiment).filter(
+            Sentiment.minister == minister).delete()
+
         sentiment_result = methods.sentiment_checker(cleaned_tweets)
 
-        # Create a new Sentiment object
         sentiment = Sentiment(
             minister=minister,
             positive_score=sentiment_result['positive_percentage'],
@@ -117,17 +117,12 @@ def analyse_tweets():
             dateTime=datetime.now().strftime('%d-%m-%Y %H:%M')
         )
 
-        # Add the sentiment object to the session
         session.add(sentiment)
 
-        # Commit the changes to the database
         session.commit()
 
-        # Close the session
         session.close()
+
 
 scrape_and_store_ministers()
 analyse_tweets()
-
-
-

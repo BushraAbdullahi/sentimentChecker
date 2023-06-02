@@ -2,7 +2,7 @@
     display: flex;
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
-    background:rgba(127, 110, 255);
+    background:rgb(0, 0, 0);
     height: 100%; /* Ensure full height */
   }
   
@@ -10,3 +10,18 @@
     text-align: center;
   }
   
+  h1 {
+    font-weight: bold;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+
+  h2 {
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+
+  p {
+    color: white;
+    font-family: Arial, sans-serif;
+  }
