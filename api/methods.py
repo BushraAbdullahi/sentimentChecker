@@ -2,6 +2,8 @@ import tweepy
 import string
 import nltk
 import os
+import urllib.request as urllib
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -39,6 +41,37 @@ def get_tweets(query, tweet_count=5):
     # Return the tweets
     return tweets
 
+# Scraping minister data
+def getAttributes(url, tag, className):
+    # Open the URL and parse the HTML using Beautiful Soup
+    page = urllib.urlopen(url)
+    soup = BeautifulSoup(page, 'html.parser')
+
+    # Find the relevant HTML tag and id
+    cabinet_list = soup.find('ul', {'id': 'cabinet'})
+
+    # Initialize an empty list to store text or dictionary objects
+    textList = []
+
+    # If tag is 'img', extract image and name information from each list item
+    if tag == 'img':
+        for cabinet_member in cabinet_list.find_all('li'):
+            text = cabinet_member.find('a', {'class': 'gem-c-image-card__title-link govuk-link'})
+            img = cabinet_member.find('img')
+            if text and img:
+                name_str = text.text
+                img_src = img.get('src')
+                textList.append({'name': name_str.replace(
+                    'The Rt Hon ', ''), 'img_src': img_src})
+    # Otherwise, extract text information with a given tag and class from each list item
+    else:
+        for cabinet_member in cabinet_list.find_all('li'):
+            text = cabinet_member.find(tag, {'class': className})
+            if text:
+                textList.append(text.text)
+
+    # Return a list of text or dictionary objects
+    return textList
 
 # Cleaning the data
 
