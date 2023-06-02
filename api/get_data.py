@@ -16,6 +16,8 @@ class CabinetMinister(Base):
     name = Column(String)
     role = Column(String)
     img_src = Column(String)
+    dateTime = Column(String)
+
 
 
 class Sentiment(Base):
@@ -89,12 +91,6 @@ def scrape_and_store_ministers():
 
 
 def analyse_tweets():
-    session = Session()
-
-    # Delete all existing rows in the CabinetMinister table
-    session.query(Sentiment).delete()
-    session.commit()
-
     # get tweets
     raw_tweets = tweets(1000)
 
@@ -103,6 +99,12 @@ def analyse_tweets():
 
     # Iterate over each minister and their cleaned tweets
     for minister, cleaned_tweets in cleaned_dict.items():
+        # Open a DB session
+        session = Session()
+        
+        # Delete all existing rows in the Sentiment table for the current minister
+        session.query(Sentiment).filter(Sentiment.minister == minister).delete()
+
         # Apply sentiment analysis to the cleaned tweets
         sentiment_result = methods.sentiment_checker(cleaned_tweets)
 
@@ -118,11 +120,11 @@ def analyse_tweets():
         # Add the sentiment object to the session
         session.add(sentiment)
 
-    # Commit the changes to the database
-    session.commit()
+        # Commit the changes to the database
+        session.commit()
 
-    # Close the session
-    session.close()
+        # Close the session
+        session.close()
 
 scrape_and_store_ministers()
 analyse_tweets()
