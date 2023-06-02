@@ -1,24 +1,16 @@
 import os
-from flask import request
 from database import db
 from dotenv import load_dotenv
 from flask import Flask
 from flask.helpers import send_from_directory
 from flask_cors import CORS, cross_origin
 from flask import jsonify
-from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String, Numeric
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
-import urllib.request as urllib
-import nltk
 import alembic.config
-from datetime import datetime
 
-nltk.download('punkt')
-nltk.download('vader_lexicon')
-nltk.download('wordnet')
-nltk.download('stopwords')
+
 load_dotenv()
 
 # Import Flask and CORS libraries
@@ -46,79 +38,30 @@ class Sentiment(Base):
     neutral_score = Column(Numeric)
     dateTime = Column(String)
         
-# Define function to scrape attributes from HTML using Beautiful Soup
-def getAttributes(url, tag, className):
-    # Open the URL and parse the HTML using Beautiful Soup
-    page = urllib.urlopen(url)
-    soup = BeautifulSoup(page, 'html.parser')
-
-    # Find the relevant HTML tag and id
-    cabinet_list = soup.find('ul', {'id': 'cabinet'})
-
-    # Initialize an empty list to store text or dictionary objects
-    textList = []
-
-    # If tag is 'img', extract image and name information from each list item
-    if tag == 'img':
-        for cabinet_member in cabinet_list.find_all('li'):
-            text = cabinet_member.find('a', {'class': 'gem-c-image-card__title-link govuk-link'})
-            img = cabinet_member.find('img')
-            if text and img:
-                name_str = text.text
-                img_src = img.get('src')
-                textList.append({'name': name_str.replace(
-                    'The Rt Hon ', ''), 'img_src': img_src})
-    # Otherwise, extract text information with a given tag and class from each list item
-    else:
-        for cabinet_member in cabinet_list.find_all('li'):
-            text = cabinet_member.find(tag, {'class': className})
-            if text:
-                textList.append(text.text)
-
-    # Return a list of text or dictionary objects
-    return textList
-
-  
-# Define the default route for the web application
 @app.route('/ministers')
 @cross_origin()
-def getData():
+def getMinisters():
     # Create a new session within the Flask app context
     with app.app_context():
         Session = sessionmaker(bind=db.engine)
         session = Session()
 
-        govPage = 'https://www.gov.uk/government/ministers'
+        # Query the ministers data from the CabinetMinister table
+        ministers = session.query(CabinetMinister).all()
 
-        # Call the getAttributes function to extract names, roles, and images
-        names = getAttributes(govPage, 'a', 'gem-c-image-card__title-link govuk-link')
-        roles = getAttributes(govPage, 'div', 'gem-c-image-card__description')
-        images = getAttributes(govPage, 'img', '')
+        ministers_list = []
 
-        combined_list = []
-        # Combine the names, roles, and images into a single list of dictionaries
-        for name, role, image in zip(names, roles, images):
-            combined_list.append({
-                "name": name,
-                "role": role,
-                "img_src": image["img_src"]
+        for minister in ministers:
+            ministers_list.append({
+                "name": minister.name,
+                "role": minister.role,
+                "img_src": minister.img_src
             })
-
-        # Delete all existing rows in the CabinetMinister table
-        session.query(CabinetMinister).delete()
-        session.commit()
-
-        # Write the names, roles, and images to the CabinetMinister table
-        for data in combined_list:
-            minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'])
-            session.merge(minister)
-
-        session.commit()
 
         # Close the session
         session.close()
 
-    return jsonify(combined_list)
+        return jsonify(ministers_list)
 
 
 @app.route('/sentiments')
