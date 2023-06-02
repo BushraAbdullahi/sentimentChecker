@@ -98,7 +98,6 @@ def scrape_and_store_ministers():
 
 def analyse_tweets():
     raw_tweets = tweets(1000)
-    print(len(raw_tweets))
 
     cleaned_dict = clean_tweets(raw_tweets)
 
