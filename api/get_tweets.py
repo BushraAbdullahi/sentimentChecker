@@ -11,7 +11,6 @@ load_dotenv()
 
 Base = declarative_base()
 
-
 class CabinetMinister(Base):
     __tablename__ = 'cabinet_ministers'
     id = Column(Integer, primary_key=True)
@@ -69,7 +68,7 @@ def analyse_tweets():
     session.commit()
 
     # get tweets
-    raw_tweets = tweets(5)
+    raw_tweets = tweets(1000)
 
     # Clean tweets
     cleaned_dict = clean_tweets(raw_tweets)
