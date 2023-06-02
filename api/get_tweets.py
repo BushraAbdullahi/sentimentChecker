@@ -1,11 +1,10 @@
 from sqlalchemy import create_engine, Column, Integer, String, Numeric
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
-from methods import get_tweets
+import methods
 import os
 from dotenv import load_dotenv
 from datetime import datetime
-import methods
 
 load_dotenv()
 
@@ -29,7 +28,6 @@ class Sentiment(Base):
     dateTime = Column(String)
 
 
-
 engine = create_engine(os.getenv('DATABASE_URL'))
 Session = sessionmaker(bind=engine)
 
@@ -39,11 +37,10 @@ def tweets(count):
     all_tweets = {}
 
     for minister in session.query(CabinetMinister).all():
-        tweets = get_tweets(minister.name, tweet_count=count)
+        tweets = methods.get_tweets(minister.name, tweet_count=count)
         all_tweets[minister.name] = tweets
 
     return all_tweets
-
 
 def clean_tweets(tweets_dict):
     cleaned_dict = {}
@@ -59,6 +56,37 @@ def clean_tweets(tweets_dict):
         cleaned_dict[minister] = cleaned_tweets
 
     return cleaned_dict
+
+def scrape_and_store_ministers():
+    session = Session()
+
+    govPage = 'https://www.gov.uk/government/ministers'
+
+    # Call the getAttributes function to extract names, roles, and images
+    names = methods.getAttributes(govPage, 'a', 'gem-c-image-card__title-link govuk-link')
+    roles = methods.getAttributes(govPage, 'div', 'gem-c-image-card__description')
+    images = methods.getAttributes(govPage, 'img', '')
+
+    combined_list = []
+    # Combine the names, roles, and images into a single list of dictionaries
+    for name, role, image in zip(names, roles, images):
+        combined_list.append({
+            "name": name,
+            "role": role,
+            "img_src": image["img_src"]
+        })
+
+    # Delete all existing rows in the CabinetMinister table
+    session.query(CabinetMinister).delete()
+    session.commit()
+
+    # Write the names, roles, and images to the CabinetMinister table
+    for data in combined_list:
+        minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'])
+        session.merge(minister)
+
+    session.commit()
+
 
 def analyse_tweets():
     session = Session()
@@ -96,7 +124,7 @@ def analyse_tweets():
     # Close the session
     session.close()
 
-
+scrape_and_store_ministers()
 analyse_tweets()
 
 
