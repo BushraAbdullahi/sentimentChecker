@@ -137,10 +137,9 @@ def getSentiments():
         for sentiment in sentiments:
             minister = sentiment.minister
             sentiment_scores[minister] = {
-                "positive_percentage": sentiment.positive_score,
-                "negative_percentage": sentiment.negative_score,
-                "neutral_percentage": sentiment.neutral_score
-            }
+            "positive_percentage": float(sentiment.positive_score),
+            "negative_percentage": float(sentiment.negative_score),
+            "neutral_percentage": float(sentiment.neutral_score)            }
 
         # Close the session
         session.close()
