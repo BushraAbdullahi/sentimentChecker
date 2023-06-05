@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-import '../App.css'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { PieChart } from 'react-minimal-pie-chart'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import '../App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Chart } from "react-google-charts";
 
-// Define a component named OrgChart.
 const OrgChart = () => {
-  // Declare state variables.
-  const [ministers, setMinisters] = useState({})
+  const [ministers, setMinisters] = useState({});
 
   useEffect(() => {
     axios
       .get('/ministers')
       .then((res) => setMinisters(res.data))
       .catch((err) => console.error(err))
-  }, [])
+  }, []);
 
-  // Declare a state variable.
-  const [sentiments, setSentiments] = useState({})
+  const [sentiments, setSentiments] = useState({});
 
   useEffect(() => {
     axios
       .get('/sentiments')
       .then((res) => setSentiments(res.data))
       .catch((err) => console.error(err))
-  }, [])
+  }, []);
 
   function getSentimentValue(key, sentiment) {
     if (sentiments[key] && sentiments[key][sentiment]) {
@@ -37,22 +34,23 @@ const OrgChart = () => {
   return (
     <div className="org-chart">
       {Object.entries(ministers).map(([key, value], index) => {
-        const positive_percentage = getSentimentValue(
-          value.name,
-          'positive_percentage',
-        )
-        const neutral_percentage = getSentimentValue(
-          value.name,
-          'neutral_percentage',
-        )
-        const negative_percentage = getSentimentValue(
-          value.name,
-          'negative_percentage',
-        )
-        const hasData =
-          positive_percentage > 0 ||
-          neutral_percentage > 0 ||
-          negative_percentage > 0
+        const positive_percentage = getSentimentValue(value.name, 'positive_percentage');
+        const neutral_percentage = getSentimentValue(value.name, 'neutral_percentage');
+        const negative_percentage = getSentimentValue(value.name, 'negative_percentage');
+        
+        const data = [
+          ['Sentiment', 'Percentage'],
+          ['Positive', positive_percentage],
+          ['Neutral', neutral_percentage],
+          ['Negative', negative_percentage],
+        ];
+        
+        const options = {
+          title: 'Sentiment Breakdown',
+          colors: ['#006B3D', '#FF980E', '#D3212C'], // positive - green, neutral - yellow, negative - red        
+        };
+
+        const hasData = positive_percentage > 0 || neutral_percentage > 0 || negative_percentage > 0;
 
         return (
           <div className="card" key={key}>
@@ -61,31 +59,17 @@ const OrgChart = () => {
             </div>
             <h2>{value.name}</h2>
             <h3>{value.role}</h3>
-            <div className="pie-chart">
-              {hasData ? (
-                <PieChart
-                  data={[
-                    {
-                      title: 'Positive Percentage: ' + positive_percentage,
-                      value: positive_percentage,
-                      color: '#ABFF77',
-                    },
-                    {
-                      title: 'Neutral Percentage: ' + neutral_percentage,
-                      value: neutral_percentage,
-                      color: '#FFED78',
-                    },
-                    {
-                      title: 'Negative Percentage: ' + negative_percentage,
-                      value: negative_percentage,
-                      color: '#FF7878',
-                    },
-                  ]}
-                />
-              ) : (
-                <div>No Data</div>
-              )}
-            </div>
+            {hasData ? (
+              <Chart
+                chartType="PieChart"
+                data={data}
+                options={options}
+                width={"100%"}
+                height={"200px"}
+              />
+            ) : (
+              <div>No Data</div>
+            )}
           </div>
         )
       })}
@@ -93,4 +77,4 @@ const OrgChart = () => {
   )
 }
 
-export default OrgChart
+export default OrgChart;
