@@ -17,15 +17,15 @@ nltk.download('stopwords')
 
 load_dotenv()
 
-Api_key = os.getenv('Api_key')
-API_secret_key = os.getenv('API_secret_key')
-Access_Token = os.getenv('Access_Token')
-Access_Token_Secret = os.getenv('Access_Token_Secret')
+API_KEY = os.getenv('API_KEY')
+API_SECRET_KEY = os.getenv('API_SECRET_KEY')
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
 def get_tweets(query, tweet_count=5):
     # Authenticate to Twitter
-    auth = tweepy.OAuthHandler(Api_key, API_secret_key)
-    auth.set_access_token(Access_Token, Access_Token_Secret)
+    auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
     # Create API object
     api = tweepy.API(auth, wait_on_rate_limit=True)

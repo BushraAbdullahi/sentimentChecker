@@ -41,7 +41,6 @@ def tweets(count):
     for minister in session.query(CabinetMinister).all():
         tweets = methods.get_tweets(minister.name, tweet_count=count)
         all_tweets[minister.name] = tweets
-
     return all_tweets
 
 
