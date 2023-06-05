@@ -1,0 +1,41 @@
+name: Daily Cron Job
+
+on:
+  schedule:
+    - cron: '5 4 * * *'   # Runs at 4:05 am UTC time
+
+jobs:
+  run_cron_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: pip install -r api/requirements.txt
+
+      - name: Set environment variables
+        run: |
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+          echo "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" >> $GITHUB_ENV
+          echo "API_KEY=$API_KEY" >> $GITHUB_ENV
+          echo "API_SECRET_KEY=$API_SECRET_KEY" >> $GITHUB_ENV
+          echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
+          echo "SECRET_TOKEN=$SECRET_TOKEN" >> $GITHUB_ENV
+
+      - name: Run Cron Job
+        run: python api/get_data.py 
+
+    env:
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+      API_KEY: ${{ secrets.API_KEY }}
+      API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_TOKEN: ${{ secrets.SECRET_TOKEN }}
