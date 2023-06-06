@@ -74,8 +74,11 @@ def scrape_and_store_ministers():
     for data in combined_list:
         minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'], dateTime=data['dateTime'])
         session.merge(minister)
+        print(f'Scraped and stored minister: {data["name"]}')  # print the minister's name here
+
     session.commit()
     print('New ministers scraped and stored in the database.')
+
 
 def analyse_tweets():
     raw_tweets = tweets(1000)
