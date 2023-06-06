@@ -70,7 +70,8 @@ def scrape_and_store_ministers():
     session.query(CabinetMinister).delete()
     session.commit()
     print('Old ministers deleted from the database.')
-    print(f'List of Ministers: {combined_list})
+    print(f'List of Ministers: {combined_list}')
+    
     for data in combined_list:
         minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'], dateTime=data['dateTime'])
         session.merge(minister)
