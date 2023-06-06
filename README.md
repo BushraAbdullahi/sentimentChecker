@@ -16,7 +16,7 @@ To run this app on your local machine, follow the steps below:
 8. Activate venv: `source venv/bin/activate`
 9. Install the necessary packages: `pip3 install -r requirements.txt`
 10. Start the front and back-end servers: `npm start`
-11. Open your browser and navigate to http://localhost:3000
+11. Open your browser and navigate to http://localhost:5000
 
 ## How it Works
 The app queries the web to get the names and images of incumbent UK Cabinet Ministers. It then uses Tweepy to get the latest tweets for each minister and nltk to perform sentiment analysis on the tweets. The sentiment score is then displayed on the app along with the minister's name and image.
