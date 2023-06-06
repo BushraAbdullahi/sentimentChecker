@@ -49,7 +49,6 @@ def clean_tweets(tweets_dict):
         tweets = methods.lemmatize_tweets(tweets)
         cleaned_tweets = methods.remove_duplicates(tweets)
         cleaned_dict[minister] = cleaned_tweets
-    print('Tweets cleaned.')
     return cleaned_dict
 
 def scrape_and_store_ministers():
@@ -70,14 +69,13 @@ def scrape_and_store_ministers():
     session.query(CabinetMinister).delete()
     session.commit()
     print('Old ministers deleted from the database.')
-    print(f'List of Ministers: {combined_list}')
+    print(f'List of Ministers scraped: {combined_list}')
     
     for data in combined_list:
         minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'], dateTime=data['dateTime'])
         session.merge(minister)
 
     session.commit()
-    print('New ministers scraped and stored in the database.')
 
 
 def analyse_tweets():
@@ -95,4 +93,3 @@ def analyse_tweets():
 
 scrape_and_store_ministers()
 analyse_tweets()
-print('All tasks completed.')
