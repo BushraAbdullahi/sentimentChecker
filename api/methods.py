@@ -56,19 +56,20 @@ def getAttributes(url, tag, className):
     # If tag is 'img', extract image and name information from each list item
     if tag == 'img':
         for cabinet_member in cabinet_list.find_all('li'):
-            text = cabinet_member.find('a', {'class': 'gem-c-image-card__title-link govuk-link'})
-            img = cabinet_member.find('img')
-            if text and img:
-                name_str = text.text
+            img = cabinet_member.find(tag)
+            if img:
                 img_src = img.get('src')
-                textList.append({'name': name_str.replace(
-                    'The Rt Hon ', ''), 'img_src': img_src})
-    # Otherwise, extract text information with a given tag and class from each list item
-    else:
+                textList.append(img_src)
+    elif tag == 'h3':
         for cabinet_member in cabinet_list.find_all('li'):
-            text = cabinet_member.find(tag, {'class': className})
-            if text:
-                textList.append(text.text)
+            name = cabinet_member.find(tag, {'class': 'current-appointee'}).find('span', {'class': 'app-person-link__name govuk-!-padding-0 govuk-!-margin-0'})
+            if name:
+                textList.append(name.text.strip())
+    else:  # case for roles
+        for cabinet_member in cabinet_list.find_all('li'):
+            role = cabinet_member.find('p', {'class': 'govuk-body-s app-person__roles app-person__roles--with-image'})
+            if role:
+                textList.append(role.text.strip())
 
     # Return a list of text or dictionary objects
     return textList

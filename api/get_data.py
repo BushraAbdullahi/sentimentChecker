@@ -54,15 +54,17 @@ def clean_tweets(tweets_dict):
 def scrape_and_store_ministers():
     session = Session()
     govPage = 'https://www.gov.uk/government/ministers'
-    names = methods.getAttributes(govPage, 'a', 'gem-c-image-card__title-link govuk-link')
-    roles = methods.getAttributes(govPage, 'div', 'gem-c-image-card__description')
+    
+    names = methods.getAttributes(govPage, 'h3', 'current-appointee')
+    roles = methods.getAttributes(govPage, 'p', 'govuk-body-s app-person__roles app-person__roles--with-image')
     images = methods.getAttributes(govPage, 'img', '')
+    
     combined_list = []
     for name, role, image in zip(names, roles, images):
         combined_list.append({
             "name": name,
             "role": role,
-            "img_src": image["img_src"],
+            "img_src": image,
             "dateTime": datetime.now().strftime('%d-%m-%Y %H:%M')
         })
 
