@@ -18,7 +18,7 @@ const Header = () => {
       <div className="headerContent">
         <h1>Government Minister Sentiment Analysis</h1>
         <h2>{displayDate}</h2>
-        <p>This chart displays sentiment analysis of tweets from various government ministers.</p>
+        <p>This chart displays sentiment analysis of tweets for various government ministers.</p>
       </div>
     </div>
   )
