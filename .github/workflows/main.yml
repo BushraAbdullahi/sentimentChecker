@@ -28,6 +28,7 @@ jobs:
           echo "API_SECRET_KEY=$API_SECRET_KEY" >> $GITHUB_ENV
           echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
           echo "SECRET_TOKEN=$SECRET_TOKEN" >> $GITHUB_ENV
+          echo "BEARER_TOKEN=$BEARER_TOKEN" >> $GITHUB_ENV
 
       - name: Run Cron Job
         run: python api/get_data.py 
@@ -39,3 +40,4 @@ jobs:
       API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       SECRET_TOKEN: ${{ secrets.SECRET_TOKEN }}
+      BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
