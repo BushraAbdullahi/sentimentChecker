@@ -1,5 +1,9 @@
 import tweepy
 import string
+import time
+import requests
+from requests.structures import CaseInsensitiveDict
+import json
 import nltk
 import os
 import urllib.request as urllib
@@ -21,27 +25,60 @@ API_KEY = os.getenv('API_KEY')
 API_SECRET_KEY = os.getenv('API_SECRET_KEY')
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
+BEARER_TOKEN = os.getenv('BEARER_TOKEN')
 
-def get_tweets(query, tweet_count=5):
-    # Authenticate to Twitter
-    auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+# def get_tweets(query, tweet_count=1000):
+#     # Authenticate to Twitter
+#     auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
+#     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
-    # Create API object
-    api = tweepy.API(auth, wait_on_rate_limit=True)
+#     # Create API object
+#     api = tweepy.API(auth, wait_on_rate_limit=True)
 
-    # Use the Cursor object to get tweets matching the query
+#     # Use the Cursor object to get tweets matching the query
+#     tweets = []
+#     for tweet in tweepy.Cursor(api.search_tweets, q=query, lang='en', result_type='recent', tweet_mode='extended').items(tweet_count):
+#         if 'retweeted_status' in dir(tweet):   # If it's a retweet
+#             tweets.append(tweet.retweeted_status.full_text)
+#         else:                                  # If it's a normal tweet
+#             tweets.append(tweet.full_text)
+
+#     # Return the tweets
+#     return tweets
+
+def get_tweets(query, tweet_count=1000):
+    headers = CaseInsensitiveDict()
+    headers["Authorization"] = f"Bearer {BEARER_TOKEN}"
+    headers["User-Agent"] = "v2RecentSearchPython"
+
+    base_url = f"https://api.twitter.com/2/tweets/search/recent?query={query}&tweet.fields=text"
+    url = base_url
     tweets = []
-    for tweet in tweepy.Cursor(api.search_tweets, q=query, lang='en', result_type='recent', tweet_mode='extended').items(tweet_count):
-        if 'retweeted_status' in dir(tweet):   # If it's a retweet
-            tweets.append(tweet.retweeted_status.full_text)
-        else:                                  # If it's a normal tweet
-            tweets.append(tweet.full_text)
 
-    # Return the tweets
-    return tweets
+    while len(tweets) < tweet_count:
+        resp = requests.get(url, headers=headers)
+        if resp.status_code == 429:  # Rate limit hit
+            print(f"Rate limit hit. Waiting for 15 minutes")
+            time.sleep(15*60)  # wait 15 minutes
+            continue
+        elif resp.status_code != 200:
+            print(f"Response status code: {resp.status_code}")
+            print(f"Response text: {resp.text}")
+            raise ValueError("Failed to fetch tweets")
 
-# Scraping minister data
+        data = resp.json()
+        new_tweets = [tweet['text'] for tweet in data['data']]
+        tweets.extend(new_tweets)
+
+        # Check if there's more tweets to fetch
+        if 'next_token' in data['meta']:
+            next_token = data['meta']['next_token']
+            url = base_url + f"&next_token={next_token}"
+        else:
+            break
+
+    return tweets[:tweet_count] 
+
 def getAttributes(url, tag, className):
     # Open the URL and parse the HTML using Beautiful Soup
     page = urllib.urlopen(url)
@@ -49,6 +86,11 @@ def getAttributes(url, tag, className):
 
     # Find the relevant HTML tag and id
     cabinet_list = soup.find('ul', {'id': 'cabinet'})
+
+    # Check if cabinet_list was found
+    if not cabinet_list:
+        print("Cabinet list not found in HTML.")
+        return []
 
     # Initialize an empty list to store text or dictionary objects
     textList = []
@@ -62,14 +104,22 @@ def getAttributes(url, tag, className):
                 textList.append(img_src)
     elif tag == 'h3':
         for cabinet_member in cabinet_list.find_all('li'):
-            name = cabinet_member.find(tag, {'class': 'current-appointee'}).find('span', {'class': 'app-person-link__name govuk-!-padding-0 govuk-!-margin-0'})
+            name = cabinet_member.find(tag, class_=className)
             if name:
                 textList.append(name.text.strip())
+            else:
+                print(f"No {tag} with class {className} found in cabinet_member.")
     else:  # case for roles
         for cabinet_member in cabinet_list.find_all('li'):
-            role = cabinet_member.find('p', {'class': 'govuk-body-s app-person__roles app-person__roles--with-image'})
-            if role:
-                textList.append(role.text.strip())
+            role_div = cabinet_member.find('div', class_=className)
+            if role_div:
+                role = role_div.find('p')
+                if role:
+                    textList.append(role.text.strip())
+                else:
+                    print(f"No p tag found in div with class {className}.")
+            else:
+                print(f"No div with class {className} found in cabinet_member.")
 
     # Return a list of text or dictionary objects
     return textList

@@ -5,6 +5,7 @@ import methods
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import json
 
 load_dotenv()
 
@@ -30,12 +31,21 @@ class Sentiment(Base):
 engine = create_engine(os.getenv('DATABASE_URL'))
 Session = sessionmaker(bind=engine)
 
+# def write_tweets_to_json(raw_tweets, filename='tweets.json'):
+#     with open(filename, 'w') as f:
+#         json.dump(raw_tweets, f)
+        
 def tweets(count):
     session = Session()
     all_tweets = {}
-    for minister in session.query(CabinetMinister).all():
-        tweets = methods.get_tweets(minister.name, tweet_count=count)
+    combined_list = session.query(CabinetMinister).all()  # Get the ministers in the desired order
+
+    for minister in combined_list:
+        query_name = minister.name.replace('CBE', '').replace('KC', '').strip()
+        tweets = methods.get_tweets(query_name, tweet_count=count)
         all_tweets[minister.name] = tweets
+        print(f'Collected {len(tweets)} tweets for {query_name}.')
+        
     print(f'Collected {sum([len(tweets) for tweets in all_tweets.values()])} tweets.')
     return all_tweets
 
@@ -55,8 +65,8 @@ def scrape_and_store_ministers():
     session = Session()
     govPage = 'https://www.gov.uk/government/ministers'
     
-    names = methods.getAttributes(govPage, 'h3', 'current-appointee')
-    roles = methods.getAttributes(govPage, 'p', 'govuk-body-s app-person__roles app-person__roles--with-image')
+    names = methods.getAttributes(govPage, 'h3', 'gem-c-image-card__title govuk-heading-s')
+    roles = methods.getAttributes(govPage, 'p', 'gem-c-image-card__description')
     images = methods.getAttributes(govPage, 'img', '')
     
     combined_list = []
@@ -71,17 +81,18 @@ def scrape_and_store_ministers():
     session.query(CabinetMinister).delete()
     session.commit()
     print('Old ministers deleted from the database.')
-    print(f'List of Ministers scraped: {combined_list}')
+    print(f'List of Ministers scraped: {[item["name"] for item in combined_list]}')
     
     for data in combined_list:
         minister = CabinetMinister(name=data['name'], role=data['role'], img_src=data['img_src'], dateTime=data['dateTime'])
         session.merge(minister)
 
     session.commit()
+    session.close()
 
 
 def analyse_tweets():
-    raw_tweets = tweets(1000)
+    raw_tweets = tweets(100)
     cleaned_dict = clean_tweets(raw_tweets)
     for minister, cleaned_tweets in cleaned_dict.items():
         session = Session()
