@@ -27,57 +27,25 @@ ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 BEARER_TOKEN = os.getenv('BEARER_TOKEN')
 
-# def get_tweets(query, tweet_count=1000):
-#     # Authenticate to Twitter
-#     auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
-#     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+def get_tweets(query, tweet_count=100):
+    # Authenticate to Twitter
+    auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
-#     # Create API object
-#     api = tweepy.API(auth, wait_on_rate_limit=True)
+    # Create API object
+    api = tweepy.API(auth, wait_on_rate_limit=True)
 
-#     # Use the Cursor object to get tweets matching the query
-#     tweets = []
-#     for tweet in tweepy.Cursor(api.search_tweets, q=query, lang='en', result_type='recent', tweet_mode='extended').items(tweet_count):
-#         if 'retweeted_status' in dir(tweet):   # If it's a retweet
-#             tweets.append(tweet.retweeted_status.full_text)
-#         else:                                  # If it's a normal tweet
-#             tweets.append(tweet.full_text)
-
-#     # Return the tweets
-#     return tweets
-
-def get_tweets(query, tweet_count=1000):
-    headers = CaseInsensitiveDict()
-    headers["Authorization"] = f"Bearer {BEARER_TOKEN}"
-    headers["User-Agent"] = "v2RecentSearchPython"
-
-    base_url = f"https://api.twitter.com/2/tweets/search/recent?query={query}&tweet.fields=text"
-    url = base_url
+    # Use the Cursor object to get tweets matching the query
     tweets = []
+    for tweet in tweepy.Cursor(api.search_tweets, q=query, lang='en', result_type='recent', tweet_mode='extended').items(tweet_count):
+        if 'retweeted_status' in dir(tweet):   # If it's a retweet
+            tweets.append(tweet.retweeted_status.full_text)
+        else:                                  # If it's a normal tweet
+            tweets.append(tweet.full_text)
 
-    while len(tweets) < tweet_count:
-        resp = requests.get(url, headers=headers)
-        if resp.status_code == 429:  # Rate limit hit
-            print(f"Rate limit hit. Waiting for 15 minutes")
-            time.sleep(15*60)  # wait 15 minutes
-            continue
-        elif resp.status_code != 200:
-            print(f"Response status code: {resp.status_code}")
-            print(f"Response text: {resp.text}")
-            raise ValueError("Failed to fetch tweets")
+    # Return the tweets
+    return tweets
 
-        data = resp.json()
-        new_tweets = [tweet['text'] for tweet in data['data']]
-        tweets.extend(new_tweets)
-
-        # Check if there's more tweets to fetch
-        if 'next_token' in data['meta']:
-            next_token = data['meta']['next_token']
-            url = base_url + f"&next_token={next_token}"
-        else:
-            break
-
-    return tweets[:tweet_count] 
 
 def getAttributes(url, tag, className):
     # Open the URL and parse the HTML using Beautiful Soup
