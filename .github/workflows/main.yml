@@ -2,7 +2,7 @@ name: Daily Cron Job
 
 on:
   schedule:
-    - cron: '00 15 * * *'   # Runs at 3:00 pm UTC time
+    - cron: '10 2 * * *'   # Runs at 3:10 am BST (2:10 am UTC)
 
 jobs:
   run_cron_job:
